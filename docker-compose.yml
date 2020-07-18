@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+    postgres:
+        image: postgres:11
+        container_name: check-processos-db
+        hostname: postgres
+        ports:
+            - '5433:5432'
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: CheckProcessos@2020
+            POSTGRES_DB: check-processos
+        volumes:
+             - 'database/:/var/lib/postgresql/data'
+        restart: unless-stopped
+    app:
+        build: .
+        container_name: check-processos-api
+        ports:
+            - '3000:3000'
+        depends_on:
+            - postgres
+        volumes:
+            - './:/usr/scr/app'
+        restart: always
+volumes:
+    database:

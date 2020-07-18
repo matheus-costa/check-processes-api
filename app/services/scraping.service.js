@@ -5,7 +5,7 @@ const https = require('https');
 const fs = require('fs');
 const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
-const { Console } = require('console');
+const enviroment = require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -22,49 +22,26 @@ module.exports = {
         }).then((processes) => {
 
             for (let process of processes) {
-                console.log(process.urlQuery);
                 
-                Scraping.scrapProcess(process).then(result => {
-                    console.log(result.documents.length);
+                this.scrapProcess(process).then(result => {
+                    console.log(result.lastDocument);
+
                     for (const document of result.documents) {
-                        Scraping.workDocument(document).then(result => {
-                            Scraping.sendDocumentEmail(process, document);
+                        this.workDocument(process, document).then(docs => {
+                            this.sendDocumentEmail(process, document);
                         });
                     }
+
+                    process.set('lastDocument', result.lastDocument);
+                    console.log(process);
+                    Process.update(process, {where: {id: process.id}}).then(p => {
+                        console.log("PROCESSO LIDO COM SUCESSO");
+                    });
                 });
             }
 
         }).catch((error) => {
             console.log(error);
-        });
-    },
-
-    workDocument(document) {
-        return new Promise(async (resolve, reject) => {
-            const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
-                responseType: 'text',
-                responseEncoding: 'latin1',
-                httpsAgent: new https.Agent({ rejectUnauthorized: false })
-            });
-
-            // CASO O DOCUMENTO SEJA PDF, REFAZER REQUISICAO
-            if (response.data.startsWith('%PDF')){
-                console.log("DOCUMENTO DO TIPO PDF, NOVA REQUISICAO SERA REALIZADA");
-                const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
-                    responseType: 'stream',
-                    responseEncoding: 'latin1',
-                    httpsAgent: new https.Agent({ rejectUnauthorized: false })
-                });
-                await response.data.pipe(fs.createWriteStream(`./uploads/${document.code}.pdf`));
-                console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
-                resolve(document);
-            } else {
-                pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
-                    if (err) reject(err);
-                    console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
-                    resolve(document);
-                });
-            }
         });
     },
 
@@ -79,7 +56,7 @@ module.exports = {
 
                 const lengthProcess = $('#tblDocumentos tbody .infraTrClara').length;
                 const result = { lastDocument: lengthProcess, documents: [] };
-                let lastDocument = 219;
+                let lastDocument = process.lastDocument;
 
                 if (lengthProcess > lastDocument) {
 
@@ -130,11 +107,40 @@ module.exports = {
 
     },
 
+    workDocument(process, document) {
+        return new Promise(async (resolve, reject) => {
+            const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
+                responseType: 'text',
+                responseEncoding: 'latin1',
+                httpsAgent: new https.Agent({ rejectUnauthorized: false })
+            });
+
+            // CASO O DOCUMENTO SEJA PDF, REFAZER REQUISICAO
+            if (response.data.startsWith('%PDF')){
+                console.log("DOCUMENTO DO TIPO PDF, NOVA REQUISICAO SERA REALIZADA");
+                const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
+                    responseType: 'stream',
+                    responseEncoding: 'latin1',
+                    httpsAgent: new https.Agent({ rejectUnauthorized: false })
+                });
+                await response.data.pipe(fs.createWriteStream(`./uploads/${document.code}.pdf`));
+                console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
+                resolve(document);
+            } else {
+                pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
+                    if (err) reject(err);
+                    console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
+                    resolve(document);
+                });
+            }
+        });
+    },
+
     sendDocumentEmail(process, document) {
-        console.log("INICIANDO ENVIO DE EMAIL PROCESS: " + process.code);
+        console.log("INICIANDO ENVIO DE EMAIL EMAIL: " + process.code);
         const mailOptions = {
             from: 'mcostap80@gmail.com',
-            to: process.env.EMAIL_TO,
+            to: enviroment.parsed.EMAIL_TO,
             subject: `Sistema: Novo Registro no Processo ${process.code}`,
             html: `Olá, um novo registro foi adicionado no processo <b>${process.code}</b>, arquivo em anexo.<br>
                     <b>Documento:</b> ${document.code} <br>

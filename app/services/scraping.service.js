@@ -23,6 +23,15 @@ module.exports = {
 
             for (let process of processes) {
                 console.log(process.urlQuery);
+                
+                Scraping.scrapProcess(process).then(result => {
+                    console.log(result.documents.length);
+                    for (const document of result.documents) {
+                        Scraping.workDocument(document).then(result => {
+                            Scraping.sendDocumentEmail(process, document);
+                        });
+                    }
+                });
             }
 
         }).catch((error) => {
@@ -47,12 +56,12 @@ module.exports = {
                     httpsAgent: new https.Agent({ rejectUnauthorized: false })
                 });
                 await response.data.pipe(fs.createWriteStream(`./uploads/${document.code}.pdf`));
-                console.log("FINALIZANDO ESCRITA DE DOCUMENTO");
+                console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
                 resolve(document);
             } else {
                 pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
                     if (err) reject(err);
-                    console.log("FINALIZANDO ESCRITA DE DOCUMENTO");
+                    console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
                     resolve(document);
                 });
             }
@@ -122,10 +131,10 @@ module.exports = {
     },
 
     sendDocumentEmail(process, document) {
-        console.log("INICIANDO ENVIO DE EMAIL");
+        console.log("INICIANDO ENVIO DE EMAIL PROCESS: " + process.code);
         const mailOptions = {
             from: 'mcostap80@gmail.com',
-            to: 'f7midia@gmail.com',
+            to: process.env.EMAIL_TO,
             subject: `Sistema: Novo Registro no Processo ${process.code}`,
             html: `Olá, um novo registro foi adicionado no processo <b>${process.code}</b>, arquivo em anexo.<br>
                     <b>Documento:</b> ${document.code} <br>

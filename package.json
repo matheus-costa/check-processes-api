@@ -21,10 +21,10 @@
     "node-cron": "^2.0.3",
     "nodemailer": "^6.4.10",
     "pg": "^8.3.0",
-    "sequelize": "^6.3.1"
+    "sequelize": "^6.3.1",
+    "sequelize-cli": "^6.2.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4",
-    "sequelize-cli": "^6.2.0"
+    "nodemon": "^2.0.4"
   }
 }

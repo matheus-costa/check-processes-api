@@ -36,6 +36,6 @@ cron.schedule("0,45 1,8 * * *", function() {
 //     }
 // });
 
-app.listen(3000, function () {
+app.listen(process.env.PORT || 3000, function () {
     console.log('Example app listening on port 3000!');
 });

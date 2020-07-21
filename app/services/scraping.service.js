@@ -119,12 +119,12 @@ module.exports = {
                     httpsAgent: new https.Agent({ rejectUnauthorized: false })
                 });
                 await response.data.pipe(fs.createWriteStream(`./uploads/${document.code}.pdf`));
-                console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
+                console.log(`FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: ${process.code} DOCUMENT: ${document.code}`);
                 resolve(document);
             } else {
                 pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
                     if (err) reject(err);
-                    console.log("FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: " + process.code);
+                    console.log(`FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: ${process.code} DOCUMENT: ${document.code}`);
                     resolve(document);
                 });
             }

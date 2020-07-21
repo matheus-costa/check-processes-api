@@ -35,4 +35,12 @@ module.exports = {
             })
             .catch((error) => { res.status(400).send(error); });
     },
+
+    delete(req, res) {
+        return Process.destroy({ where: {id: req.params.id} })
+            .then((sucess) => {
+                res.json(sucess);
+            })
+            .catch((error) => { res.status(400).send(error); });
+    }
 }

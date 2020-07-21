@@ -10,8 +10,8 @@ const enviroment = require('dotenv').config();
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'mcostap80@gmail.com',
-        pass: 'Mc24041997'
+        user: enviroment.parsed.EMAIL_FROM,
+        pass: enviroment.parsed.EMAIL_PASSWORD
     }
 });
 module.exports = {
@@ -22,7 +22,6 @@ module.exports = {
         }).then((processes) => {
 
             for (let process of processes) {
-                
                 this.scrapProcess(process).then(result => {
                     console.log(result.lastDocument);
 
@@ -32,11 +31,7 @@ module.exports = {
                         });
                     }
 
-                    process.set('lastDocument', result.lastDocument);
-                    console.log(process);
-                    Process.update(process, {where: {id: process.id}}).then(p => {
-                        console.log("PROCESSO LIDO COM SUCESSO");
-                    });
+                    process.update({ lastDocument: result.lastDocument });
                 });
             }
 
@@ -139,7 +134,7 @@ module.exports = {
     sendDocumentEmail(process, document) {
         console.log("INICIANDO ENVIO DE EMAIL EMAIL: " + process.code);
         const mailOptions = {
-            from: 'mcostap80@gmail.com',
+            from: enviroment.parsed.EMAIL_FROM,
             to: enviroment.parsed.EMAIL_TO,
             subject: `Sistema: Novo Registro no Processo ${process.code}`,
             html: `Olá, um novo registro foi adicionado no processo <b>${process.code}</b>, arquivo em anexo.<br>

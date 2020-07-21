@@ -14,6 +14,7 @@ router.get('/api/user', userController.list);
 router.get('/process', processController.list);
 router.get('/process/:id', processController.find);
 router.post('/process/save', processController.save);
+router.delete('/process/:id', processController.delete);
 
 
 module.exports = router;

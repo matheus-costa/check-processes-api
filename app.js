@@ -34,19 +34,9 @@ cron.schedule("45 19 * * *", function() {
     Scraping.start();
 });
 
-// cron.schedule("* * * * *", function() {
+// cron.schedule("59 9 * * *", function() {
 //     console.log("Start scraping of processes");
 //     Scraping.start();
-// });
-
-// let process = {code: '50622.000638/2018-39', urlQuery: 'https://sei.dnit.gov.br/sei/modulos/pesquisa/md_pesq_processo_exibir.php?PZI69t_Z_hj3AifdlTrE4iTpBcSuICOmNN150aCRiIlX3c-BEmh9gzEC8gKvkzpdxz5WncELtJoM98tHLPT2NeoT0e1q6EApiMdSdWWeOM39Aup13S95t_C1Hqh-yKnf'};
-// Scraping.scrapProcess(process).then( result => {
-//     console.log(result.documents.length);
-//     for (const document of result.documents) {
-//         Scraping.workDocument(document).then( result => {
-//             Scraping.sendDocumentEmail(process, document);
-//         });
-//     }
 // });
 
 app.listen(process.env.PORT || 3000, function () {

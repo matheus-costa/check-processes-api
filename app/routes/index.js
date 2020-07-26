@@ -10,7 +10,8 @@ router.get('/', function(req, res, next) {
     res.send('Express Application');
 });
 
-router.get('/api/user', userController.list);
+router.get('/user', userController.list);
+router.post('/user/save', userController.save);
 router.get('/process', processController.list);
 router.get('/process/:id', processController.find);
 router.post('/process/save', processController.save);

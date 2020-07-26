@@ -22,12 +22,12 @@ module.exports = {
         }).then((processes) => {
 
             for (let process of processes) {
-                this.scrapProcess(process).then(result => {
+                this.scrapProcess(process).then(async result => {
                     console.log(result.lastDocument);
 
                     for (const document of result.documents) {
-                        this.workDocument(process, document).then(docs => {
-                            this.sendDocumentEmail(process, document);
+                        await this.workDocument(process, document).then(async docs => {
+                            await this.sendDocumentEmail(process, document);
                         });
                     }
 
@@ -111,16 +111,18 @@ module.exports = {
             });
 
             // CASO O DOCUMENTO SEJA PDF, REFAZER REQUISICAO
-            if (response.data.startsWith('%PDF')){
+            if (response.data.startsWith('%PDF')) {
                 console.log("DOCUMENTO DO TIPO PDF, NOVA REQUISICAO SERA REALIZADA");
-                const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
-                    responseType: 'stream',
-                    responseEncoding: 'latin1',
-                    httpsAgent: new https.Agent({ rejectUnauthorized: false })
-                });
-                await response.data.pipe(fs.createWriteStream(`./uploads/${document.code}.pdf`));
-                console.log(`FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: ${process.code} DOCUMENT: ${document.code}`);
+                document.attachmentLink = true;
                 resolve(document);
+                // const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
+                //     responseType: 'stream',
+                //     responseEncoding: 'latin1',
+                //     httpsAgent: new https.Agent({ rejectUnauthorized: false })
+                // });
+
+                // await response.data.pipe(await fs.createWriteStream(`./uploads/${document.code}.pdf`));
+                // console.log(`FINALIZANDO ESCRITA DE DOCUMENTO TIPO PDF PROCESS: ${process.code} DOCUMENT: ${document.code}`);
             } else {
                 pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
                     if (err) reject(err);
@@ -132,33 +134,44 @@ module.exports = {
     },
 
     sendDocumentEmail(process, document) {
-        console.log("INICIANDO ENVIO DE EMAIL EMAIL: " + process.code);
-        const mailOptions = {
-            from: enviroment.parsed.EMAIL_SEND,
-            to: enviroment.parsed.EMAIL_TO,
-            subject: `Sistema: Novo Registro no Processo ${process.code}`,
-            html: `Olá, um novo registro foi adicionado no processo <b>${process.code}</b>, arquivo em anexo.<br>
+        return new Promise(async (resolve, reject) => {
+            console.log("INICIANDO ENVIO DE EMAIL EMAIL: " + process.code);
+
+            const mailOptions = {
+                from: enviroment.parsed.EMAIL_SEND,
+                to: enviroment.parsed.EMAIL_TO,
+                subject: `Sistema: Novo Registro no Processo ${process.code}`,
+                html: `Olá, um novo registro foi adicionado no processo <b>${process.code}</b>, arquivo em anexo.<br>
                     <b>Documento:</b> ${document.code} <br>
                     <b>Tipo de Documento:</b> ${document.type}<br>
                     <b>Data do Documento:</b>  ${document.date}<br>
                     <b>Data de Registro:</b>  ${document.registerDate}<br>
                     <b>Unidade:</b>  ${document.unity}`,
-            attachments: {
-                path: `./uploads/${document.code}.pdf`
-            }
-        };
+            };
 
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ' + info.response);
-                try {
-                    fs.unlinkSync(`./uploads/${document.code}.pdf`)
-                } catch (err) {
-                    console.error(err)
-                }
+            let documentFile = { path: `./uploads/${document.code}.pdf` }
+            if(document.attachmentLink){
+                documentFile = null;
+                mailOptions.html = `${mailOptions.html}<br>
+                    <b>URL Download:</b> https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`;
             }
+            mailOptions.attachments = documentFile
+
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error)
+                    reject(error);
+                else {
+                    console.log('Email sent: ' + info.response);
+                    try {
+                        if(!document.attachmentLink)
+                            fs.unlinkSync(`./uploads/${document.code}.pdf`);
+
+                        resolve('Email sent');
+                    } catch (err) {
+                        reject(err)
+                    }
+                }
+            });
         });
     }
 }

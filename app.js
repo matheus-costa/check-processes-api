@@ -34,7 +34,7 @@ cron.schedule("45 19 * * *", function() {
     Scraping.start();
 });
 
-cron.schedule("22 0 * * *", function() {
+cron.schedule("35 12 * * *", function() {
     console.log("Start scraping of processes");
     Scraping.start();
 });

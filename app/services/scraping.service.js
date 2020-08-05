@@ -110,18 +110,10 @@ module.exports = {
             });
 
             // CASO O DOCUMENTO SEJA PDF, REFAZER REQUISICAO
-            if (response.data.startsWith('%PDF')) {
+            if (!response.data.startsWith('<!DOCTYPE html')) {
                 console.log("DOCUMENTO DO TIPO PDF, SERA ENVIADO UM LINK PARA DOWNLOAD");
                 document.attachmentLink = true;
                 resolve(document);
-                // const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
-                //     responseType: 'stream',
-                //     responseEncoding: 'latin1',
-                //     httpsAgent: new https.Agent({ rejectUnauthorized: false })
-                // });
-
-                // await response.data.pipe(await fs.createWriteStream(`./uploads/${document.code}.pdf`));
-                // console.log(`FINALIZANDO ESCRITA DE DOCUMENTO TIPO PDF PROCESS: ${process.code} DOCUMENT: ${document.code}`);
             } else {
                 let $ = cheerio.load(response.data);
                 $('.Texto_Centralizado img').attr('width', '768');

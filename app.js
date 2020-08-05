@@ -7,14 +7,6 @@ const app = express();
 const indexRouter = require('./app/routes/index');
 const { Scraping } = require('./app/services');
 
-const pdf = require('html-pdf');
-const axios = require('axios');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-const cheerio = require('cheerio');
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());

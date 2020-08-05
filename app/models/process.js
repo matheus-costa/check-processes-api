@@ -4,7 +4,7 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Process extends Model { };
   Process.init({
-    code: DataTypes.STRING,
+    code: {type: DataTypes.STRING, unique: true },
     type: DataTypes.STRING,
     interested: DataTypes.STRING,
     registerDate: DataTypes.DATE,

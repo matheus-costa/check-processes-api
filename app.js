@@ -34,10 +34,10 @@ cron.schedule("45 19 * * *", function() {
     Scraping.start();
 });
 
-cron.schedule("35 12 * * *", function() {
-    console.log("Start scraping of processes");
-    Scraping.start();
-});
+// cron.schedule("07 12 * * *", function() {
+//     console.log("Start scraping of processes");
+//     Scraping.start();
+// });
 
 app.listen(process.env.PORT || 3000, function () {
     console.log('Example app listening on port 3000!');

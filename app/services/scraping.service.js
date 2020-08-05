@@ -56,7 +56,6 @@ module.exports = {
                 if (lengthProcess > lastDocument) {
 
                     // DECREMENTO NECESSARIO POIS NO BANCO GRAVA O LENGTH E NAO O INDEX.
-                    lastDocument--;
                     $('#tblDocumentos tbody .infraTrClara').each((index, item) => {
                         if (index >= lastDocument) {
                             let dataDocument = {};
@@ -112,7 +111,7 @@ module.exports = {
 
             // CASO O DOCUMENTO SEJA PDF, REFAZER REQUISICAO
             if (response.data.startsWith('%PDF')) {
-                console.log("DOCUMENTO DO TIPO PDF, NOVA REQUISICAO SERA REALIZADA");
+                console.log("DOCUMENTO DO TIPO PDF, SERA ENVIADO UM LINK PARA DOWNLOAD");
                 document.attachmentLink = true;
                 resolve(document);
                 // const response = await axios.get(`https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`, {
@@ -124,7 +123,10 @@ module.exports = {
                 // await response.data.pipe(await fs.createWriteStream(`./uploads/${document.code}.pdf`));
                 // console.log(`FINALIZANDO ESCRITA DE DOCUMENTO TIPO PDF PROCESS: ${process.code} DOCUMENT: ${document.code}`);
             } else {
-                pdf.create(response.data, { format: 'Letter' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
+                let $ = cheerio.load(response.data);
+                $('.Texto_Centralizado img').attr('width', '768');
+                
+                pdf.create($.html(), { format: 'A4' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
                     if (err) reject(err);
                     console.log(`FINALIZANDO ESCRITA DE DOCUMENTO PROCESS: ${process.code} DOCUMENT: ${document.code}`);
                     resolve(document);

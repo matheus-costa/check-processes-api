@@ -116,7 +116,7 @@ module.exports = {
                 resolve(document);
             } else {
                 let $ = cheerio.load(response.data);
-                $('.Texto_Centralizado img').attr('width', '768');
+                $('.Texto_Centralizado img').attr('width', '700');
                 
                 pdf.create($.html(), { format: 'A4' }).toFile(`./uploads/${document.code}.pdf`, (err, res,) => {
                     if (err) reject(err);

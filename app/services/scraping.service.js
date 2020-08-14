@@ -140,14 +140,14 @@ module.exports = {
                     <b>Tipo de Documento:</b> ${document.type}<br>
                     <b>Data do Documento:</b>  ${document.date}<br>
                     <b>Data de Registro:</b>  ${document.registerDate}<br>
-                    <b>Unidade:</b>  ${document.unity}`,
+                    <b>Unidade:</b>  ${document.unity}
+                    <b>URL Download:</b> https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`,
+
             };
 
             let documentFile = { path: `./uploads/${document.code}.pdf` }
             if(document.attachmentLink){
                 documentFile = null;
-                mailOptions.html = `${mailOptions.html}<br>
-                    <b>URL Download:</b> https://sei.dnit.gov.br/sei/modulos/pesquisa/${document.url}`;
             }
             mailOptions.attachments = documentFile
 

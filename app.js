@@ -13,15 +13,7 @@ app.use(cors());
 
 app.use('/', indexRouter);
 
-cron.schedule("0 8,15,17 * * *", function() {
-    console.log("Start scraping of processes");
-    Scraping.start();
-});
-cron.schedule("30 10,12 * * *", function() {
-    console.log("Start scraping of processes");
-    Scraping.start();
-});
-cron.schedule("45 19 * * *", function() {
+cron.schedule("0 7,8,9,10,11,12,13,14,15,16,17,18,19,20 * * *", function() {
     console.log("Start scraping of processes");
     Scraping.start();
 });
